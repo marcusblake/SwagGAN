@@ -80,4 +80,5 @@ class DenseNet(nn.Module):
         # mask = mask_seg & mask_bbox
 
         body = fine[:, self.body_indexes]
+        
         return body
