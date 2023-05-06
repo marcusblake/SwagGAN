@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
 
+from .pose import DenseNet
+from .clip import CLIPModel
+from .segmentation import SegModel
+
+
 class SwagGAN(nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -70,17 +75,3 @@ class SwagGAN(nn.Module):
         #with torch.no_grad():
         #    imgs_final = self.blend_mask * imgs_gen + (1-self.blend_mask) * self.imgs_batch
         #yield imgs_final, imgs_gen, loss_dict_scaled
-'''
-class SwagGAN(nn.Module):
-    def __init__(self):
-      super().__init__()
-      self.segementation = None
-      self.pose = None
-      self.clip = None
-      self.encoder = None
-      self.generator = None
-
-    def forward(self, images: torch.Tensor, text: torch.Tensor) -> torch.Tensor:
-      pass
-      
-'''
