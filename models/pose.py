@@ -7,6 +7,12 @@ from detectron2.config import CfgNode, get_cfg
 from detectron2.engine.defaults import DefaultPredictor  
 
 from densepose import add_densepose_config
+from typing import List
+from PIL import Image
+
+
+DETECTRON_CONFIG_PATH = './models/model_configs/densepose_rcnn_R_50_FPN_s1x.yaml'
+DETECTRON_MODEL_URL = 'https://dl.fbaipublicfiles.com/densepose/densepose_rcnn_R_50_FPN_s1x/165712039/model_final_162be9.pkl'
 
 def setup_config(cfg_path, model_path, opts):
     cfg = get_cfg()
@@ -22,13 +28,25 @@ def setup_config(cfg_path, model_path, opts):
 class DenseNet(nn.Module):
     def __init__(self, indexes=None):
         super().__init__()
-        cfg = setup_config(cfg_path = 'detectron2-main/projects/DensePose/configs/densepose_rcnn_R_50_FPN_s1x.yaml',
-                           model_path = 'https://dl.fbaipublicfiles.com/densepose/densepose_rcnn_R_50_FPN_s1x/165712039/model_final_162be9.pkl',
+        cfg = setup_config(cfg_path = DETECTRON_CONFIG_PATH,
+                           model_path = DETECTRON_MODEL_URL,
                            opts = [])
         self.model = DefaultPredictor(cfg).model
         self.body_indexes = indexes or [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
 
-    def forward(self, img, instances):  # img in [0, 1]
+    def forward(self, imgs: torch.Tensor) -> torch.Tensor: 
+        """
+        Image pixel values must be in the range [0,1].
+
+        Normalize images so that pixel values are in between 0 and 1.
+        Resize image so that it's square.
+
+        Parameters:
+            imgs - Batch of input images to the DensePose model.
+
+        Output:
+            body - H X W X 24
+        """
         img = img[:, [2, 1, 0], :, :]   # rgb to bgr
         img = img * 255
         height, width = img.shape[-2:]
@@ -62,5 +80,4 @@ class DenseNet(nn.Module):
         # mask = mask_seg & mask_bbox
 
         body = fine[:, self.body_indexes]
-        
         return body
