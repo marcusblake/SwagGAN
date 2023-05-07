@@ -11,7 +11,7 @@ class SwagGAN(nn.Module):
         super().__init__()
         
         self.generator = None# load_gan()
-        self.clip = None# CLIP
+        self.clip = CLIPModel()
         self.pose = DenseNet()
         self.segmentation = SegModel()
         self.encoder = None
