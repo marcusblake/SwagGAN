@@ -14,7 +14,7 @@ class ContrastiveLoss(nn.Module):
         """
         # Normalize embeddings
 
-        text_embeds, image_embeds = F.normalize(text_embeds, dim=1), F.normalize(image_embeds)
+        text_embeds, image_embeds = F.normalize(text_embeds, dim=1), F.normalize(image_embeds, dim=1)
         # Need to calculate dot products 
         logits = (text_embeds @ image_embeds.T) # N x N matrix.
         batch_size = text_embeds.shape[0]
