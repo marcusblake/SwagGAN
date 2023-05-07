@@ -1,0 +1,6 @@
+{
+    "segmentation_model": "models/pre_trained_models/checkpoint256_0040_DeepLabV3_Fashion_Men.pth",
+    "encoder_model": "models/pre_trained_models/e4e.pt",
+    "generator_model": "models/pre_trained_models/generator.pt",
+    "detectron_config": "models/model_configs/densepose_rcnn_R_50_FPN_s1x.yaml"
+}

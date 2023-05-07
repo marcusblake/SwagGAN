@@ -4,6 +4,8 @@ import torch.nn as nn
 from .pose import DenseNet
 from .clip import CLIPModel
 from .segmentation import SegModel
+from .gan import GAN
+from .encoder import Encoder
 from detectron2.structures.instances import Instances
 from detectron2.structures.boxes import Boxes
 from typing import List
@@ -18,6 +20,16 @@ class ResultDictKeys(Enum):
     TXT_EMBEDDINGS = 'txt_embeds'
     IMG_EMBEDDINGS = 'img_embeds'
 
+class ModelConfig:
+    def __init__(self,
+                 encoder_pre_trained_path: str,
+                 generator_pre_trained_path: str,
+                 segmentation_pre_trained_path: str,
+                 detectron_config_path: str):
+        self.encoder_pre_trained_path = encoder_pre_trained_path
+        self.generator_pre_trained_path = generator_pre_trained_path
+        self.segmentation_pre_trained_path = segmentation_pre_trained_path
+        self.detectron_config_path = detectron_config_path
 
 def set_instances(box, bs):
     box = Boxes(box)
@@ -26,14 +38,14 @@ def set_instances(box, bs):
     return instances
 
 class SwagGAN(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, config: ModelConfig) -> None:
         super().__init__()
         
-        self.generator = None# load_gan()
+        self.generator = GAN(config.generator_pre_trained_path)
         self.clip = CLIPModel()
-        self.pose = DenseNet()
-        self.segmentation = SegModel()
-        self.encoder = None
+        self.pose = DenseNet(config.detectron_config_path)
+        self.segmentation = SegModel(config.segmentation_pre_trained_path)
+        self.encoder = Encoder(config.encoder_pre_trained_path)
     
     @torch.no_grad()
     def densenet_forward(self, imgs):
@@ -48,9 +60,9 @@ class SwagGAN(nn.Module):
         _, _, head = self.segmentation.forward(imgs)
         return head
 
-    def forward(self, images: torch.Tensor, latent_rep: torch.Tensor, text: List[str]) -> torch.Tensor:
+    def forward(self, images: torch.Tensor, latent_rep: torch.Tensor, text: str) -> torch.Tensor:
         """
-        This forward function takes in a batch of images and list of text descriptions/captions.
+        This forward function takes in a batch of images and an individual text desciption/caption.
         
         Parameters:
             images - Images represented as a PyTorch tensor
@@ -61,7 +73,7 @@ class SwagGAN(nn.Module):
             generated_imgs = self.generator(latent_rep)
             head = self.deeplab_seg_head(generated_imgs)
             body = self.densenet_forward(generated_imgs)
-            text_embeds, img_embeds = self.clip(text, images)
+            text_embeds, img_embeds = self.clip([text], images)
         results['generated_imgs'] = generated_imgs
         results['dense_body'] = body
         results['segm_head'] = head

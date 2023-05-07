@@ -1,14 +1,36 @@
 import argparse
 from losses.losses import img_loss_fn, shape_loss_fn, clip_loss_fn, w_delta_loss_fn
-from models.swaggan import SwagGAN, ResultDictKeys
-from data.deep_fashion import DeepFashionMultimodalImageAndTextDataset
-from utils.utils import get_body_mask, get_head_mask
+from models.swaggan import SwagGAN, ResultDictKeys, ModelConfig
+from utils.utils import get_body_mask, get_head_mask, ConvertToSquareImg, image_stitch
 import torch
+from torchvision import transforms
+from torchvision.utils import save_image
+from os import listdir
+from os.path import isfile, join
+from typing import List
+import json
 
+def get_image_files_in_directory(directory_path: str) -> List[str]:
+    images = []
+    for file in listdir(directory_path):
+        full_image_path = join(directory_path, file)
+        if isfile(full_image_path):
+            images.append(full_image_path)
+    return images
+
+def create_model_config():
+    with open('swaggan_config.json', 'r') as f:
+        config = json.loads(f)
+        return ModelConfig(
+            config['encoder_model'],
+            config['generator_model'],
+            config['segmentation_model'],
+            config['detectron_config']
+        )
 
 def train(lr: float,
-          dataset_path: str,
-          batch_size: int,
+          img_path: str,
+          txt_description: str,
           epochs: int,
           output_file: str,
           lambda_clip: float,
@@ -16,15 +38,23 @@ def train(lr: float,
           lambda_latent_reg: float,
           lambda_img: float,
           lambda_head: float) -> None:
-    
 
-    model = SwagGAN().requires_grad_(False)
+    model = SwagGAN(create_model_config()).requires_grad_(False)
+    trans = transforms.Compose([
+        ConvertToSquareImg(),
+        transforms.ToTensor(),
+        transforms.Resize((250,250))
+    ])
+
+    images = get_image_files_in_directory(img_path)
+    n = len(images)
+    transformed_images = trans(images)
 
     with torch.no_grad():
         # Pass in initial image to get segmentation.
         _, body, head = model.segmentation.forward()
-        latent_rep = model.encoder.forward()
-        body_shape = model.densenet_forward()
+        latent_rep = model.encoder.forward(transformed_images)
+        body_shape = model.densenet_forward(transformed_images)
 
     head_and_background_mask = 1 - get_body_mask(body)
     org_head_mask = get_head_mask(head)
@@ -32,30 +62,38 @@ def train(lr: float,
     optimizer = torch.optim.Adam([latent_rep], lr=lr)
     for epoch in range(1, epochs+1):
         print('Epoch {}/{}'.format(epoch, epochs))
-        cummulative_loss = 0.0
 
-        result = model(img_batch, latent_rep, text)
+        result = model(transformed_images, latent_rep, txt_description)
         pred_head_segm = result[ResultDictKeys.SEGM_HEAD]
         generated_imgs = result[ResultDictKeys.GEN_IMAGES]
         pred_body_shape = result[ResultDictKeys.DENSE_POSE_BODY]
+        txt_embed = result[ResultDictKeys.TXT_EMBEDDINGS]
+        img_embed = result[ResultDictKeys.IMG_EMBEDDINGS]
 
         pred_head_mask = get_head_mask(pred_head_segm)
-        loss = lambda_clip * clip_loss_fn() + lambda_img * img_loss_fn(head_and_background_mask * org_images, head_and_background_mask * generated_imgs) + lambda_latent_reg * w_delta_loss_fn() + \
+        loss = lambda_clip * clip_loss_fn(img_embed, txt_embed) + \
+                lambda_img * img_loss_fn(head_and_background_mask * transformed_images, head_and_background_mask * generated_imgs) + \
+                lambda_latent_reg * w_delta_loss_fn(latent_rep) + \
                 lambda_head * shape_loss_fn(org_head_mask, pred_head_mask) + \
                 lambda_pose * shape_loss_fn(body_shape, pred_body_shape)
         
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        cummulative_loss += loss.item()
-        avg_train_loss = cummulative_loss / n
+        avg_train_loss = loss.item() / n
         print('\t train loss {:.6f}'.format(avg_train_loss))
+
+    # Output final predictions to output directory.
+    result = model(transformed_images, latent_rep, txt_description)
+    generated_imgs = result[ResultDictKeys.GEN_IMAGES]
+    final_images = image_stitch(transformed_images, generated_imgs, head)
+    imgs_compare = torch.cat((transformed_images, final_images), dim=0)
+    save_image(imgs_compare, output_file, nrows=n)
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--lr', type=float, default=1e-3, required=False)
-    parser.add_argument('--dataset_path', type=str, required=True)
-    parser.add_argument('--batch_size', type=int, default=50, required=False)
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--output_file', type=str, default='output.png')
     parser.add_argument('--lambda_clip', type=float, default=1)
@@ -63,13 +101,16 @@ def main():
     parser.add_argument('--lambda_latent_reg', type=float, default=2)
     parser.add_argument('--lambda_img', type=float, default=30)
     parser.add_argument('--lambda_head', type=float, default=10)
+    parser.add_argument('--description', type='str', required=True)
+    parser.add_argument('--img_path', type=str, required=True)
 
     args = parser.parse_args()
     train(args.lr,
           args.dataset_path,
-          args.batch_size,
+          args.description,
           args.epochs,
           args.output_file,
+          args.lambda_clip,
           args.lambda_pose,
           args.lambda_latent_reg,
           args.lambda_img,

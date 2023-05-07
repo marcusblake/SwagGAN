@@ -98,9 +98,8 @@ def configure_gan_noise(G, zero_out_noise=True, noises=None):
         raise ValueError('When passing a value to noises, the "zero_out_noise" flag must be set to False!')
 
 
-def load_gan():
-    sd_file = './checkpoints/generator.pt'
-    ckpt = torch.load(sd_file, map_location='cpu')
+def load_gan(filepath: str) -> nn.Module:
+    ckpt = torch.load(filepath, map_location='cpu')
 
     G_kwargs = ckpt['G_kwargs']
     gan = StyleGAN(size=256, to_01=True, G_kwargs=G_kwargs).eval().requires_grad_(False)

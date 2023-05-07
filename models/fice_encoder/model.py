@@ -276,10 +276,10 @@ class E4e(Module):
             w = w + self.latent_avg
         return w
 
-def load_e4e():
+def load_e4e(filepath: str) -> nn.Module:
     e4e = E4e(gan_size=256, pretrained=False, latent_avg_offset=True).eval().requires_grad_(False)
     state_dict = {}
-    ckpt = torch.load('checkpoints/e4e.pt', map_location='cpu')
+    ckpt = torch.load(filepath, map_location='cpu')
     state_dict['latent_avg'] = ckpt['latent_avg']
     state_dict.update(extract_from_statedict(ckpt['state_dict'], 'encoder'))
     e4e.load_state_dict(state_dict)

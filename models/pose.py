@@ -10,8 +10,6 @@ from densepose import add_densepose_config
 from typing import List
 from PIL import Image
 
-
-DETECTRON_CONFIG_PATH = './models/model_configs/densepose_rcnn_R_50_FPN_s1x.yaml'
 DETECTRON_MODEL_URL = 'https://dl.fbaipublicfiles.com/densepose/densepose_rcnn_R_50_FPN_s1x/165712039/model_final_162be9.pkl'
 
 def setup_config(cfg_path, model_path, opts):
@@ -26,9 +24,9 @@ def setup_config(cfg_path, model_path, opts):
     return cfg
 
 class DenseNet(nn.Module):
-    def __init__(self, indexes=None):
+    def __init__(self, detectron_config_path: str, indexes=None):
         super().__init__()
-        cfg = setup_config(cfg_path = DETECTRON_CONFIG_PATH,
+        cfg = setup_config(cfg_path = detectron_config_path,
                            model_path = DETECTRON_MODEL_URL,
                            opts = [])
         self.model = DefaultPredictor(cfg).model
