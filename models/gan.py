@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from fice_stylegan.model import load_gan
+from .fice_stylegan.model import load_gan
 
 
 class GAN(nn.Module):

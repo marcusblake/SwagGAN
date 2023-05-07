@@ -54,6 +54,7 @@ mpmath==1.3.0
 mypy-extensions==1.0.0
 nest-asyncio @ file:///home/conda/feedstock_root/build_artifacts/nest-asyncio_1664684991461/work
 networkx==3.1
+ninja==1.11.1
 numpy==1.24.3
 nvidia-cublas-cu11==11.10.3.66
 nvidia-cuda-cupti-cu11==11.7.101

@@ -2,12 +2,15 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 from transformers import CLIPTextModelWithProjection, CLIPVisionModelWithProjection, CLIPImageProcessor, CLIPTokenizer
+from transformers import logging
 from typing import List, Tuple
 from PIL import Image
 
 
 DEFAULT_CLIP_MODEL = 'openai/clip-vit-base-patch32"'
 FASHION_CLIP_MODEL = "patrickjohncyh/fashion-clip"
+
+logging.set_verbosity_error()
 
 class CLIPModel(nn.Module):
     def __init__(self, dropout: float = 0):

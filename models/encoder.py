@@ -1,4 +1,4 @@
-from fice_encoder.model import load_e4e
+from .fice_encoder.model import load_e4e
 import torch.nn as nn
 import torch
 

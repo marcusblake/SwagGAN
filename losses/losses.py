@@ -7,7 +7,7 @@ def img_loss_fn(im1: torch.Tensor, im2: torch.Tensor) -> torch.Tensor:
     return loss
 
 def shape_loss_fn(im1: torch.Tensor, im2: torch.Tensor) -> torch.Tensor:
-    loss = F.mse_loss(im1, im2, reduction='none')
+    loss = F.mse_loss(im1.float(), im2.float(), reduction='none')
     loss = loss.mean((1,2,3)).sum()
     return loss
 

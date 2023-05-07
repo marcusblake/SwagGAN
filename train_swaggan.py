@@ -9,18 +9,20 @@ from os import listdir
 from os.path import isfile, join
 from typing import List
 import json
+from PIL import Image
 
-def get_image_files_in_directory(directory_path: str) -> List[str]:
+def get_images_in_directory(directory_path: str) -> List[Image.Image]:
     images = []
     for file in listdir(directory_path):
         full_image_path = join(directory_path, file)
         if isfile(full_image_path):
-            images.append(full_image_path)
+            images.append(Image.open(full_image_path))
     return images
 
 def create_model_config():
     with open('swaggan_config.json', 'r') as f:
-        config = json.loads(f)
+        config = json.loads(f.read())
+        print(config)
         return ModelConfig(
             config['encoder_model'],
             config['generator_model'],
@@ -43,17 +45,17 @@ def train(lr: float,
     trans = transforms.Compose([
         ConvertToSquareImg(),
         transforms.ToTensor(),
-        transforms.Resize((250,250))
+        transforms.Resize((256,256))
     ])
 
-    images = get_image_files_in_directory(img_path)
+    images = get_images_in_directory(img_path)
     n = len(images)
-    transformed_images = trans(images)
+    transformed_images = torch.stack([trans(image) for image in images])
 
     with torch.no_grad():
         # Pass in initial image to get segmentation.
-        _, body, head = model.segmentation.forward()
-        latent_rep = model.encoder.forward(transformed_images)
+        _, body, head = model.segmentation.forward(transformed_images)
+        latent_rep = model.encoder.forward(transformed_images).requires_grad_(True)
         body_shape = model.densenet_forward(transformed_images)
 
     head_and_background_mask = 1 - get_body_mask(body)
@@ -101,12 +103,12 @@ def main():
     parser.add_argument('--lambda_latent_reg', type=float, default=2)
     parser.add_argument('--lambda_img', type=float, default=30)
     parser.add_argument('--lambda_head', type=float, default=10)
-    parser.add_argument('--description', type='str', required=True)
+    parser.add_argument('--description', type=str, required=True)
     parser.add_argument('--img_path', type=str, required=True)
 
     args = parser.parse_args()
     train(args.lr,
-          args.dataset_path,
+          args.img_path,
           args.description,
           args.epochs,
           args.output_file,

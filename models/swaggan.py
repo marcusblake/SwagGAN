@@ -74,9 +74,9 @@ class SwagGAN(nn.Module):
             head = self.deeplab_seg_head(generated_imgs)
             body = self.densenet_forward(generated_imgs)
             text_embeds, img_embeds = self.clip([text], images)
-        results['generated_imgs'] = generated_imgs
-        results['dense_body'] = body
-        results['segm_head'] = head
-        results['txt_embeds'] = text_embeds
-        results['img_embeds'] = img_embeds
+        results[ResultDictKeys.GEN_IMAGES] = generated_imgs.float()
+        results[ResultDictKeys.DENSE_POSE_BODY] = body.float()
+        results[ResultDictKeys.SEGM_HEAD] = head.float()
+        results[ResultDictKeys.TXT_EMBEDDINGS] = text_embeds.float()
+        results[ResultDictKeys.IMG_EMBEDDINGS] = img_embeds.float()
         return results

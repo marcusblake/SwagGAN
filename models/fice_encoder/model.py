@@ -6,12 +6,17 @@ import torch
 from torch import nn
 from torch.nn import Conv2d, BatchNorm2d, PReLU, Sequential, Module
 import torch.nn.functional as F
-from utils import extract_from_statedict
 
 from .helpers import get_blocks, bottleneck_IR, bottleneck_IR_SE, _upsample_add
 from .extra_modules import EqualLinear
 
 thisdir = os.path.dirname(__file__)
+
+def extract_from_statedict(statedict, name:str = 'model'):
+    if name.endswith('.'):
+        name = name[:-1]
+    newdict = {k[len(name)+1:]: v for k, v in statedict.items() if k.startswith(name)}
+    return newdict
 
 class ProgressiveStage(Enum):
     WTraining = 0
