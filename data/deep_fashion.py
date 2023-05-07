@@ -1,6 +1,5 @@
 from torch.utils.data import Dataset
 from PIL import Image
-from .cloud_utils import get_from_cloud_storage
 import json
 import re
 
@@ -18,10 +17,8 @@ class DeepFashionMultimodalImageAndTextDataset(Dataset):
                  text_transforms = None,
                  image_transforms = None,
                  women_only = False,
-                 men_only = False,
-                 cloud_bucket = None):
+                 men_only = False):
         self.folder = dataset_folder
-        self.cloud_bucket = cloud_bucket
         self.images_folder = f'{dataset_folder}/images'
         
         self.images = []

@@ -24,14 +24,17 @@ class CLIPModel(nn.Module):
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         ])
 
+    def get_device(self) -> str:
+        return 'cuda:0' if torch.cuda.is_available() else 'cpu' 
+
     def encode_images(self, image_batch: List[Image.Image]) -> torch.Tensor:
-        input_ = self.image_processor(images=image_batch, padding=True, return_tensors='pt').pixel_values
+        input_ = self.image_processor(images=image_batch, padding=True, return_tensors='pt').pixel_values.to(self.get_device())
         input_ = self.transform(input_)
         input_ = self.dropout(input_)
         return self.image_encoder(input_).image_embeds
     
     def encode_text(self, text_batch: List[str]):
-        input_ = self.tokenizer.tokenize(text_batch)
+        input_ = self.tokenizer.tokenize(text_batch).to(self.get_device())
         return self.text_encoder(**input_).text_embeds
 
     def forward(self, text_batch: List[str], image_batch: List[Image.Image]) -> Tuple[torch.Tensor, torch.Tensor]:
