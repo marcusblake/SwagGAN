@@ -3,6 +3,7 @@
 MODEL_DIRECTORY="models/pre_trained_models"
 declare -a PretrainedModelUrls=(
     "http://storage.googleapis.com/deep_fashion_multimodal/pre_trained_models/checkpoint_0040_DeepLabV3_Fashion_Men.pth"
+    "http://storage.googleapis.com/deep_fashion_multimodal/pre_trained_models/checkpoint256_0040_DeepLabV3_Fashion_Men.pth"
 )
 
 if [ -d ${MODEL_DIRECTORY} ]; then 

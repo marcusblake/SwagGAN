@@ -2,6 +2,7 @@ import torch
 from PIL import Image
 
 SEGM_HEAD_LABEL = 1
+SEGM_BODY_LABEL = 2
 
 def image_stich(original_image: torch.Tensor, generated_image: torch.Tensor, segm: torch.Tensor) -> torch.Tensor:  
     segm_head_mask = (segm==SEGM_HEAD_LABEL).int()
@@ -9,6 +10,13 @@ def image_stich(original_image: torch.Tensor, generated_image: torch.Tensor, seg
     head = torch.mul(original_image, segm_head_mask)
     body_and_background = torch.mul(generated_image, segm_body_mask)
     return head + body_and_background
+
+
+def get_body_mask(segm: torch.Tensor) -> torch.Tensor:
+    return (segm == SEGM_BODY_LABEL).int()
+
+def get_head_mask(segm: torch.Tensor) -> torch.Tensor:
+    return (segm == SEGM_HEAD_LABEL).int()
 
 
 def expand2square(pil_img: Image.Image, background_color: int):

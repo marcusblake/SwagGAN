@@ -10,5 +10,5 @@ class Encoder(nn.Module):
         super().__init__()
         self.e4e = E4e(pretrained=pretrained)
 
-    def forward(image: List[Image.Image]) -> torch.Tensor:
+    def forward(image: torch.Tensor) -> torch.Tensor:
         pass
