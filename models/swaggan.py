@@ -4,7 +4,16 @@ import torch.nn as nn
 from .pose import DenseNet
 from .clip import CLIPModel
 from .segmentation import SegModel
+from detectron2.structures.instances import Instances
+from detectron2.structures.boxes import Boxes
+from typing import List
+from PIL import Image
 
+def set_instances(box, bs):
+    box = Boxes(box)
+    instances = [{'pred_classes': torch.tensor([0], device=box.device), 'pred_boxes': box} for _ in range(bs)]
+    instances = [Instances(image_size=(256, 256), **x) for x in instances]
+    return instances
 
 class SwagGAN(nn.Module):
     def __init__(self) -> None:
@@ -18,60 +27,32 @@ class SwagGAN(nn.Module):
      
     def densenet_forward(self, imgs):
         bs = imgs.size(0)
-        box = torch.tensor([[0, 0, 1101, 1101]], device=imgs.device)
+        box = torch.tensor([[0, 0, 256, 256]], device=imgs.device)
         instances = set_instances(box, bs)
         body = self.pose.forward(imgs, instances)
         return body
 
     def deeplab_seg_head(self, imgs):
         _, _, head = self.segmentation.forward(imgs)
-
         return head
 
-    def forward(self, images: torch.Tensor, text: torch.Tensor) -> torch.Tensor:
-        #pbar = tqdm(range(self.opt.n_iters+1))
+    def forward(self, images: torch.Tensor, text: List[str]) -> torch.Tensor:
+        """
+        This forward function takes in a batch of images and list of text descriptions/captions.
+        """
+        results = {}
 
-        #for i in pbar:
-            #w = self.w
+        latent_rep = self.encoder(images)
+        generated_imgs = self.generator(latent_rep)
+        body = self.deeplab_seg_head(generated_imgs)
+        head = self.densenet_forward(generated_imgs)
+        text_embeds, img_embeds = self.clip(text, images)
 
-            #imgs_gen = self.model.gan.gen_w(w)
-            body_shape = self.densenet_forward(images)
-            head_shape = self.deeplab_seg_head(images)
-
-            print(body_shape.shape)
-
-            loss_dict = {}
-
-            
-            loss_dict['shape'] = shape_loss_fn(body_shape, body_shape)
-            loss_dict['head_shape'] = shape_loss_fn(head_shape, head_shape)
-
-            #loss_dict['img'] = img_loss_fn(self.img_mask*imgs_gen, self.img_mask*self.imgs_batch)
-            #loss_dict['shape'] = shape_loss_fn(self.shape_real, body_shape)
-            #loss_dict['head_shape'] = shape_loss_fn(self.head_shape_init, head_shape)
-            #loss_dict['w_delta'] = w_delta_loss_fn(w)
-
-            #clip_sim = self.model.clip_similarity(imgs_gen, self.text_feats)
-            #loss_dict['clip'] =  clip_loss_fn(clip_sim)
-
-            #loss_dict_scaled = {k: loss_dict[k]*self.opt.weights_dict[k] for k in loss_dict}
-            #loss = sum(loss_dict_scaled.values())
-
-            #loss.backward()
-            #self.optimizer.step()
-            #self.optimizer.zero_grad()
-            #pbar.set_description(f'{loss.item():.3f}')
-
-            #if n_log is not None and i % n_log == 0:
-            #    ##### image composition
-            #    with torch.no_grad():
-            #        imgs_final = self.blend_mask * imgs_gen + (1-self.blend_mask) * self.imgs_batch
-
-            #    yield imgs_final, imgs_gen, loss_dict_scaled
-
-            print(loss_dict)
-
-            return loss_dict, body_shape, head_shape
-        #with torch.no_grad():
-        #    imgs_final = self.blend_mask * imgs_gen + (1-self.blend_mask) * self.imgs_batch
-        #yield imgs_final, imgs_gen, loss_dict_scaled
+        results['latent_rep'] = latent_rep
+        results['generated_imgs'] = generated_imgs
+        results['dense_body'] = body
+        results['segm_head'] = head
+        results['txt_embeds'] = text_embeds
+        results['img_embeds'] = img_embeds
+        
+        return results
