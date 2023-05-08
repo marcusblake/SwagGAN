@@ -34,13 +34,13 @@ def train(epochs: int,
     model = CLIPModel()
     dataset = DeepFashionMultimodalImageAndTextDataset(dataset_folder=dataset_folder, men_only=True)
     loss_fn = ContrastiveLoss()
-    n = 10
+    n = len(dataset)
     indices = np.arange(n)
     split = int(np.floor(0.2 * n))
     np.random.seed(0)
     np.random.shuffle(indices)
 
-    train_indices, test_indices = indices[split:], indices[:2]
+    train_indices, test_indices = indices[split:], indices[:split]
     train_sampler = SubsetRandomSampler(train_indices)
     test_sampler = SubsetRandomSampler(test_indices)
 

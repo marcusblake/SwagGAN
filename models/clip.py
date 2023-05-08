@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision import transforms
-from transformers import CLIPTextModelWithProjection, CLIPVisionModelWithProjection, CLIPImageProcessor, CLIPTokenizer
+from transformers import CLIPTextModelWithProjection, CLIPVisionModelWithProjection, CLIPImageProcessor, CLIPTokenizer, CLIPTextConfig
 from transformers import logging
 from typing import List, Tuple
 from PIL import Image
@@ -18,7 +18,7 @@ class CLIPModel(nn.Module):
         self.text_encoder = CLIPTextModelWithProjection.from_pretrained(FASHION_CLIP_MODEL)
         self.image_encoder = CLIPVisionModelWithProjection.from_pretrained(FASHION_CLIP_MODEL)
         self.image_processor = CLIPImageProcessor.from_pretrained(FASHION_CLIP_MODEL)
-        self.tokenizer = Tokenizer()
+        self.tokenizer = Tokenizer(self.text_encoder.config.max_position_embeddings)
         self.dropout = nn.Dropout(dropout)
         self.transform = transforms.Compose([
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -44,8 +44,9 @@ class CLIPModel(nn.Module):
         return text_embeds, image_embeds
 
 class Tokenizer:
-    def __init__(self):
+    def __init__(self, max_sequence_length: int):
         self.tokenizer = CLIPTokenizer.from_pretrained(FASHION_CLIP_MODEL)
+        self.max_length = max_sequence_length
 
     def tokenize(self, text: List[str]) -> torch.Tensor:
-        return self.tokenizer(text=text, return_tensors='pt', padding=True)
+        return self.tokenizer(text=text, return_tensors='pt', truncation=True, padding=True, max_length=self.max_length)
