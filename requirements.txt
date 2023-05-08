@@ -1,9 +1,9 @@
 absl-py==1.4.0
 antlr4-python3-runtime==4.9.3
-asttokens @ file:///home/conda/feedstock_root/build_artifacts/asttokens_1670263926556/work
+asttokens==2.2.1
 av==10.0.0
-backcall @ file:///home/conda/feedstock_root/build_artifacts/backcall_1592338393461/work
-backports.functools-lru-cache @ file:///home/conda/feedstock_root/build_artifacts/backports.functools_lru_cache_1618230623929/work
+backcall==0.2.0
+backports.functools-lru-cache==1.6.4
 black==23.3.0
 cachetools==5.3.0
 certifi==2022.12.7
@@ -11,16 +11,16 @@ charset-normalizer==3.1.0
 click==8.1.3
 cloudpickle==2.2.1
 cmake==3.26.3
-comm @ file:///home/conda/feedstock_root/build_artifacts/comm_1679481329611/work
+comm==0.1.3
 contourpy==1.0.7
 cycler==0.11.0
 Cython==0.29.34
-debugpy @ file:///home/conda/feedstock_root/build_artifacts/debugpy_1680755454673/work
-decorator @ file:///home/conda/feedstock_root/build_artifacts/decorator_1641555617451/work
-Detectron @ git+https://github.com/facebookresearch/densepose.git@51fb9f110a454c77b0c5acfa0c7cceb317f38aa1
-detectron2 @ git+https://github.com/facebookresearch/detectron2.git@d4a5f28e01b2babbaba9f90198fb95f5c661cccd
-detectron2-densepose @ git+https://github.com/facebookresearch/detectron2@d4a5f28e01b2babbaba9f90198fb95f5c661cccd#subdirectory=projects/DensePose
-executing @ file:///home/conda/feedstock_root/build_artifacts/executing_1667317341051/work
+debugpy==1.6.7
+decorator==5.1.1
+Detectron==0.0.0
+detectron2==0.6
+detectron2-densepose==0.6
+executing==1.2.0
 filelock==3.12.0
 fonttools==4.39.3
 fsspec==2023.4.0
@@ -33,26 +33,29 @@ h5py==3.8.0
 huggingface-hub==0.14.1
 hydra-core==1.3.2
 idna==3.4
-importlib-metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1682176699712/work
+importlib-metadata==6.6.0
 importlib-resources==5.12.0
 iopath==0.1.9
-ipykernel @ file:///home/conda/feedstock_root/build_artifacts/ipykernel_1679336319192/work
-ipython @ file:///home/conda/feedstock_root/build_artifacts/ipython_1653754926575/work
-jedi @ file:///home/conda/feedstock_root/build_artifacts/jedi_1669134318875/work
+ipykernel==6.22.0
+ipython==8.4.0
+jedi==0.18.2
 Jinja2==3.1.2
-jupyter_client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_client_1681432441054/work
-jupyter_core @ file:///home/conda/feedstock_root/build_artifacts/jupyter_core_1678994158927/work
+jupyter_client==8.2.0
+jupyter_core==5.3.0
 kiwisolver==1.4.4
 lit==16.0.3
 Markdown==3.4.3
 MarkupSafe==2.1.2
 matplotlib==3.7.1
-matplotlib-inline @ file:///home/conda/feedstock_root/build_artifacts/matplotlib-inline_1660814786464/work
+matplotlib-inline==0.1.6
 memory-profiler==0.61.0
+mkl-fft==1.3.1
+mkl-random==1.2.2
+mkl-service==2.4.0
 mock==5.0.2
 mpmath==1.3.0
 mypy-extensions==1.0.0
-nest-asyncio @ file:///home/conda/feedstock_root/build_artifacts/nest-asyncio_1664684991461/work
+nest-asyncio==1.5.6
 networkx==3.1
 ninja==1.11.1
 numpy==1.24.3
@@ -68,40 +71,43 @@ nvidia-cusparse-cu11==11.7.4.91
 nvidia-nccl-cu11==2.14.3
 nvidia-nvtx-cu11==11.7.91
 oauthlib==3.2.2
+olefile==0.46
 omegaconf==2.3.0
 opencv-python==4.7.0.72
 opencv-python-headless==4.7.0.72
-packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1681337016113/work
+packaging==23.1
 pandas==2.0.1
-parso @ file:///home/conda/feedstock_root/build_artifacts/parso_1638334955874/work
+parso==0.8.3
 pathspec==0.11.1
-pexpect @ file:///home/conda/feedstock_root/build_artifacts/pexpect_1667297516076/work
-pickleshare @ file:///home/conda/feedstock_root/build_artifacts/pickleshare_1602536217715/work
-Pillow==9.5.0
-platformdirs @ file:///home/conda/feedstock_root/build_artifacts/platformdirs_1682644429438/work
+pexpect==4.8.0
+pickleshare==0.7.5
+Pillow==7.1.2
+pip==23.1.2
+platformdirs==3.5.0
 portalocker==2.7.0
-prompt-toolkit @ file:///home/conda/feedstock_root/build_artifacts/prompt-toolkit_1677600924538/work
+prompt-toolkit==3.0.38
 protobuf==4.22.4
-psutil @ file:///home/conda/feedstock_root/build_artifacts/psutil_1681775007745/work
-ptyprocess @ file:///home/conda/feedstock_root/build_artifacts/ptyprocess_1609419310487/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
-pure-eval @ file:///home/conda/feedstock_root/build_artifacts/pure_eval_1642875951954/work
+psutil==5.9.5
+ptyprocess==0.7.0
+pure-eval==0.2.2
 pyasn1==0.5.0
 pyasn1-modules==0.3.0
 pycocotools==2.0.6
-Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1681904169130/work
+Pygments==2.15.1
 pyparsing==3.0.9
-python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1626286286081/work
+python-dateutil==2.8.2
 pytz==2023.3
 PyYAML==6.0
-pyzmq @ file:///home/conda/feedstock_root/build_artifacts/pyzmq_1679316832212/work
+pyzmq==25.0.2
 regex==2023.3.23
 requests==2.29.0
 requests-oauthlib==1.3.1
 rsa==4.9
 scipy==1.10.1
 seaborn==0.12.2
-six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
-stack-data @ file:///home/conda/feedstock_root/build_artifacts/stack_data_1669632077133/work
+setuptools==59.5.0
+six==1.16.0
+stack-data==0.6.2
 sympy==1.11.1
 tabulate==0.9.0
 tensorboard==2.13.0
@@ -109,17 +115,19 @@ tensorboard-data-server==0.7.0
 termcolor==2.3.0
 tokenizers==0.13.3
 tomli==2.0.1
-torch==2.0.0
-torchvision==0.15.1
-tornado @ file:///home/conda/feedstock_root/build_artifacts/tornado_1681817452132/work
+torch==1.8.0
+torchaudio==0.8.0a0+a751e1d
+torchvision==0.9.0
+tornado==6.3
 tqdm==4.65.0
-traitlets @ file:///home/conda/feedstock_root/build_artifacts/traitlets_1675110562325/work
+traitlets==5.9.0
 transformers==4.28.1
 triton==2.0.0
-typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1678559861143/work
+typing_extensions==4.5.0
 tzdata==2023.3
 urllib3==1.26.15
-wcwidth @ file:///home/conda/feedstock_root/build_artifacts/wcwidth_1673864653149/work
+wcwidth==0.2.6
 Werkzeug==2.3.3
+wheel==0.40.0
 yacs==0.1.8
-zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1677313463193/work
+zipp==3.15.0

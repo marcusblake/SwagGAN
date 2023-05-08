@@ -19,6 +19,10 @@ def get_images_in_directory(directory_path: str) -> List[Image.Image]:
             images.append(Image.open(full_image_path))
     return images
 
+
+def get_device():
+    return "cuda:0" if torch.cuda.is_available() else "cpu"
+
 def create_model_config():
     with open('swaggan_config.json', 'r') as f:
         config = json.loads(f.read())
@@ -40,17 +44,16 @@ def train(lr: float,
           lambda_latent_reg: float,
           lambda_img: float,
           lambda_head: float) -> None:
-
-    model = SwagGAN(create_model_config()).requires_grad_(False)
+    device = get_device()
+    model = SwagGAN(create_model_config()).to(device).requires_grad_(False)
     trans = transforms.Compose([
-        ConvertToSquareImg(),
         transforms.ToTensor(),
         transforms.Resize((256,256))
     ])
 
     images = get_images_in_directory(img_path)
     n = len(images)
-    transformed_images = torch.stack([trans(image) for image in images])
+    transformed_images = torch.stack([trans(image) for image in images]).to(device)
 
     with torch.no_grad():
         # Pass in initial image to get segmentation.
