@@ -16,10 +16,16 @@ class SegModel(nn.Module):
         self.model.eval()
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        x = F.interpolate(x, size=(1101,750), mode='bicubic', align_corners=True)
         x = self.model(x)['out']
         x = F.softmax(x, dim=1)
         
         background = x[:,0].unsqueeze(1)
         head = x[:,1].unsqueeze(1)
         body = x[:,2].unsqueeze(1)
-        return background, body, head
+        
+        background2 = F.interpolate(background, size=(256,256), mode='nearest')
+        head2 = F.interpolate(head, size=(256,256), mode='nearest')
+        body2 = F.interpolate(body, size=(256,256), mode='nearest')
+        
+        return background2, body2, head2
