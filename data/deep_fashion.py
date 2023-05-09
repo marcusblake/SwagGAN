@@ -34,7 +34,7 @@ class DeepFashionMultimodalImageAndTextDataset(Dataset):
 
     def __getitem__(self, idx):
         result = {}
-        result['img'] = Image.open(f'{self.images_folder}/{self.images[idx]}')
+        result['img'] = Image.open(f'{self.images_folder}/{self.images[idx]}').convert('RGB').resize((256,256))
         result['txt'] = self.captions[idx]
         return result
 

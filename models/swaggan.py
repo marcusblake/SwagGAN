@@ -25,11 +25,13 @@ class ModelConfig:
                  encoder_pre_trained_path: str,
                  generator_pre_trained_path: str,
                  segmentation_pre_trained_path: str,
-                 detectron_config_path: str):
+                 detectron_config_path: str,
+                 clip_pre_trained_path: str):
         self.encoder_pre_trained_path = encoder_pre_trained_path
         self.generator_pre_trained_path = generator_pre_trained_path
         self.segmentation_pre_trained_path = segmentation_pre_trained_path
         self.detectron_config_path = detectron_config_path
+        self.clip_path = clip_pre_trained_path
 
 def set_instances(box, bs):
     box = Boxes(box)
@@ -43,6 +45,7 @@ class SwagGAN(nn.Module):
         
         self.generator = GAN(config.generator_pre_trained_path)
         self.clip = CLIPModel()
+        self.clip.load_state_dict(torch.load(config.clip_path))
         self.pose = DenseNet(config.detectron_config_path)
         self.segmentation = SegModel(config.segmentation_pre_trained_path)
         self.encoder = Encoder(config.encoder_pre_trained_path)
@@ -60,7 +63,7 @@ class SwagGAN(nn.Module):
         _, _, head = self.segmentation.forward(imgs)
         return head
 
-    def forward(self, images: torch.Tensor, latent_rep: torch.Tensor, text: str) -> torch.Tensor:
+    def forward(self, latent_rep: torch.Tensor, text: str) -> torch.Tensor:
         """
         This forward function takes in a batch of images and an individual text desciption/caption.
         
@@ -73,7 +76,7 @@ class SwagGAN(nn.Module):
             generated_imgs = self.generator(latent_rep)
             head = self.deeplab_seg_head(generated_imgs)
             body = self.densenet_forward(generated_imgs)
-            text_embeds, img_embeds = self.clip([text], images)
+            text_embeds, img_embeds = self.clip([text], generated_imgs)
         results[ResultDictKeys.GEN_IMAGES] = generated_imgs.float()
         results[ResultDictKeys.DENSE_POSE_BODY] = body.float()
         results[ResultDictKeys.SEGM_HEAD] = head.float()

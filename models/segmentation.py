@@ -27,5 +27,4 @@ class SegModel(nn.Module):
         background2 = F.interpolate(background, size=(256,256), mode='nearest')
         head2 = F.interpolate(head, size=(256,256), mode='nearest')
         body2 = F.interpolate(body, size=(256,256), mode='nearest')
-        
-        return (background>0.5).float(), (body2>0.5).float(), (head2>0.5).float()
+        return (background2>0.5).float(), (body2>0.5).float(), (head2>0.5).float()

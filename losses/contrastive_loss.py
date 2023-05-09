@@ -21,4 +21,4 @@ class ContrastiveLoss(nn.Module):
         labels = torch.arange(batch_size, device=text_embeds.device)
 
         # Perform cross entropy loss
-        return 0.5 * F.cross_entropy(logits, labels) + F.cross_entropy(logits.T, labels)
+        return 0.5 * (F.cross_entropy(logits, labels) + F.cross_entropy(logits.T, labels))

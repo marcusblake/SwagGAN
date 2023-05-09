@@ -31,7 +31,8 @@ def create_model_config():
             config['encoder_model'],
             config['generator_model'],
             config['segmentation_model'],
-            config['detectron_config']
+            config['detectron_config'],
+            config['clip_model']
         )
 
 def train(lr: float,
@@ -60,15 +61,13 @@ def train(lr: float,
         _, body, head = model.segmentation.forward(transformed_images)
         latent_rep = model.encoder.forward(transformed_images).requires_grad_(True)
         body_shape = model.densenet_forward(transformed_images)
-
     head_and_background_mask = 1 - get_body_mask(body)
     org_head_mask = get_head_mask(head)
     # Optimizing over the latent representation space, not model parameters.
     optimizer = torch.optim.Adam([latent_rep], lr=lr)
     for epoch in range(1, epochs+1):
         print('Epoch {}/{}'.format(epoch, epochs))
-
-        result = model(transformed_images, latent_rep, txt_description)
+        result = model(latent_rep, txt_description)
         pred_head_segm = result[ResultDictKeys.SEGM_HEAD]
         generated_imgs = result[ResultDictKeys.GEN_IMAGES]
         pred_body_shape = result[ResultDictKeys.DENSE_POSE_BODY]
@@ -76,20 +75,26 @@ def train(lr: float,
         img_embed = result[ResultDictKeys.IMG_EMBEDDINGS]
 
         pred_head_mask = get_head_mask(pred_head_segm)
-        loss = lambda_clip * clip_loss_fn(img_embed, txt_embed) + \
-                lambda_img * img_loss_fn(head_and_background_mask * transformed_images, head_and_background_mask * generated_imgs) + \
-                lambda_latent_reg * w_delta_loss_fn(latent_rep) + \
-                lambda_head * shape_loss_fn(org_head_mask, pred_head_mask) + \
-                lambda_pose * shape_loss_fn(body_shape, pred_body_shape)
+        clip_loss = clip_loss_fn(img_embed, txt_embed)
+        img_loss = img_loss_fn(head_and_background_mask * transformed_images, head_and_background_mask * generated_imgs)
+        w_loss = w_delta_loss_fn(latent_rep)
+        head_loss = shape_loss_fn(org_head_mask, pred_head_mask)
+        pose_loss = shape_loss_fn(body_shape, pred_body_shape)
+
+        print('\t clip_loss {:.3f}, img_loss {:.3f}, w_loss {:.3f}, head_loss {:.3f}, pose_loss {:.3f}'.format(clip_loss.item(), img_loss.item(), w_loss.item(), head_loss.item(), pose_loss.item()))
+        loss = lambda_clip * clip_loss + \
+                lambda_img * img_loss + \
+                lambda_latent_reg * w_loss + \
+                lambda_head * head_loss + \
+                lambda_pose * pose_loss
         
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        avg_train_loss = loss.item() / n
-        print('\t train loss {:.6f}'.format(avg_train_loss))
+        print('\t train loss {:.3f}'.format(loss.item()))
 
     # Output final predictions to output directory.
-    result = model(transformed_images, latent_rep, txt_description)
+    result = model(latent_rep, txt_description)
     generated_imgs = result[ResultDictKeys.GEN_IMAGES]
     final_images = image_stitch(transformed_images, generated_imgs, head)
     imgs_compare = torch.cat((transformed_images, final_images), dim=0)
