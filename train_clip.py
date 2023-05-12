@@ -13,7 +13,7 @@ import numpy as np
 from torchvision import transforms
 
 def get_device():
-    return 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    return 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def custom_collate(batch):
     return {

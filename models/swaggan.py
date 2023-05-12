@@ -11,6 +11,7 @@ from detectron2.structures.boxes import Boxes
 from typing import List
 from PIL import Image
 from enum import Enum
+import torchvision.transforms as T
 
 
 class ResultDictKeys(Enum):
@@ -49,6 +50,7 @@ class SwagGAN(nn.Module):
         self.pose = DenseNet(config.detectron_config_path)
         self.segmentation = SegModel(config.segmentation_pre_trained_path)
         self.encoder = Encoder(config.encoder_pre_trained_path)
+        self.to_pil = T.ToPILImage()
     
     @torch.no_grad()
     def densenet_forward(self, imgs):
@@ -73,10 +75,15 @@ class SwagGAN(nn.Module):
         """
         results = {}
         with torch.no_grad():
-            generated_imgs = self.generator(latent_rep)
+            generated_imgs = self.generator(latent_rep).clip(0,1)
             head = self.deeplab_seg_head(generated_imgs)
             body = self.densenet_forward(generated_imgs)
-            text_embeds, img_embeds = self.clip([text], generated_imgs)
+            
+            n = generated_imgs.shape[0]
+            pil_imgs = []
+            for i in range(n):
+                pil_imgs.append(self.to_pil(generated_imgs[i].cpu().detach()))
+            text_embeds, img_embeds = self.clip([text], pil_imgs)
         results[ResultDictKeys.GEN_IMAGES] = generated_imgs.float()
         results[ResultDictKeys.DENSE_POSE_BODY] = body.float()
         results[ResultDictKeys.SEGM_HEAD] = head.float()
