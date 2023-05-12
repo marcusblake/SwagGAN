@@ -49,7 +49,7 @@ This contains some functions for visualizing work. In particular, it contains th
 This is the main script for training our clip model. Here's an example of how you an run it:
 
 ```
-python train_clip.py --lr 1e-4 --dataset_path ~./DeepFashionMultimodal --optim "adam" --checkpoint_frequency 10
+python train_clip.py --lr 1e-4 --dataset_path ~/DeepFashionMultimodal --optim "adam" --checkpoint_frequency 10
 ```
 
 ### train_swaggan.py
