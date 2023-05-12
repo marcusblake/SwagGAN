@@ -59,6 +59,8 @@ This is the main script for training the full pipeline in order to generate an e
 python train_swaggan.py --lr 0.5 --img_path ./imgs
 ```
 
+You will need to first download all of the pretrained models to run this script. You can download them by running `./download.sh`. If you want to use a different pre-trained model, then edit the necessary entries in swaggan_config.json.
+
 
 ## Learning Outcomes
 This project was quite involved and required us to learn about a few different areas of machine learning. In particular, the areas that this forced us to learn are contrastive representation learning, multimodal learning, and generative adversarial networks. We discovered how difficult it can be to train large scale neural networks.
